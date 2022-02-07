@@ -26,16 +26,17 @@ model User {
 }
 
 model Album {
-  id Int     @default(autoincrement()) @id
+  id String @unique
   name String
   image String
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
+  type String
   musics Music[]
 }
 
 model Artist {
-  id Int     @default(autoincrement()) @id
+  id String @unique
   name String
   image String
   created_at DateTime @default(now())
@@ -44,16 +45,15 @@ model Artist {
 }
 
 model Music {
-  id Int     @default(autoincrement()) @id
-  name  String @unique
-  time String
-  image String
+  id String @unique
+  name  String
+  duration Int
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
   album    Album?   @relation(fields: [album_id], references: [id])
-  album_id  Int?
+  album_id  String?
   artist    Artist?   @relation(fields: [artist_id], references: [id])
-  artist_id  Int?
+  artist_id  String?
   sessionMusics SessionMusic[]
 }
 
@@ -73,7 +73,7 @@ model SessionMusic {
   session Session? @relation(fields: [session_id], references: [id])
   session_id Int?
   music Music? @relation(fields: [music_id], references: [id])
-  music_id Int?
+  music_id String?
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
 }
