@@ -23,16 +23,16 @@ export class SessionMusicRepository implements ISessionMusicRepository {
   async create(sessionMusic: ISessionMusic) {
     const {
       musicId,
-      albumId,
+      musicName,
       artistId,
-      session_id,
+      artistName,
+      artistImage,
+      albumId,
       albumImage,
       albumName,
       albumType,
-      artistImage,
-      artistName,
       duration,
-      musicName,
+      session_id,
     } = sessionMusic;
 
     const [music, album, artist] = await Promise.all([

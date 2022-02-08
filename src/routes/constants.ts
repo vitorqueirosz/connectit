@@ -3,4 +3,9 @@ const USER = {
   base: '/users',
 };
 
-export { USER };
+const SESSION = {
+  root: '/',
+  base: '/sessions',
+};
+
+export { USER, SESSION };

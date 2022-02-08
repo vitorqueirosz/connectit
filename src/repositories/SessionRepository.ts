@@ -13,7 +13,7 @@ export class SessionRepository implements ISessionRepository {
 
   async create(session: ISession) {
     const hasSessionActive = await this.prisma.session.findFirst({
-      where: { user_id: 2 },
+      where: { user_id: 2, active: true },
     });
 
     if (hasSessionActive) throw new Error(`User already has a active session`);
