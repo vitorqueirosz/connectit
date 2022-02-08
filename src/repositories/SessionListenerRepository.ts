@@ -16,9 +16,26 @@ export class SessionListenerRepository implements ISessionListenerRepository {
 
     if (!isSectionActive) throw new Error(`Section is not active anymore`);
 
-    const sessionListenerExists = await this.prisma.sessionListener.findFirst({
-      where: { session_id, user_id: 2 },
+    const userHasActiveSession = await this.prisma.session.findFirst({
+      where: { user_id: 2, active: true },
     });
+
+    if (userHasActiveSession) {
+      await this.prisma.session.update({
+        where: {
+          id: userHasActiveSession.id,
+        },
+        data: {
+          active: false,
+        },
+      });
+    }
+
+    const sessionListenerExists =
+      !userHasActiveSession &&
+      (await this.prisma.sessionListener.findFirst({
+        where: { session_id, user_id: 2 },
+      }));
 
     if (sessionListenerExists) throw new Error(`User already on this section`);
 

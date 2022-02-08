@@ -6,4 +6,4 @@ export const userRouter = Router();
 
 const { create } = UserController;
 
-userRouter.post(USER.root, create);
+userRouter.post(USER.ROOT, create);

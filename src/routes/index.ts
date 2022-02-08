@@ -5,5 +5,5 @@ import { userRouter } from './UserRoutes';
 
 export const routes = Router();
 
-routes.use(USER.base, userRouter);
-routes.use(SESSION.base, sessionRouter);
+routes.use(USER.BASE, userRouter);
+routes.use(SESSION.BASE, sessionRouter);

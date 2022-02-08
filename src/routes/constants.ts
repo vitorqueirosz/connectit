@@ -1,11 +1,12 @@
 const USER = {
-  root: '/',
-  base: '/users',
+  ROOT: '/',
+  BASE: '/users',
 };
 
 const SESSION = {
-  root: '/',
-  base: '/sessions',
+  ROOT: '/',
+  BASE: '/sessions',
+  LISTENER: '/session-listener',
 };
 
 export { USER, SESSION };
