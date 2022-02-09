@@ -10,9 +10,22 @@ class SessionListenerController {
       prismaClient,
     );
 
-    const sessionListener = await sessionListenerRepository.create(session_id);
+    const sessionListener = await sessionListenerRepository.create(
+      session_id,
+      4,
+    );
 
     return response.status(201).json({ sessionListener });
+  }
+
+  async get(request: Request, response: Response) {
+    const sessionListenerRepository = new SessionListenerRepository(
+      prismaClient,
+    );
+
+    const sessionListener = await sessionListenerRepository.getListeners(3);
+
+    return response.json({ sessionListener });
   }
 }
 

@@ -1,7 +1,7 @@
 import { PrismaClient, SessionListener } from '@prisma/client';
 
 interface ISessionListenerRepository {
-  create: (session_id: number) => Promise<SessionListener>;
+  create: (session_id: number, user_id: number) => Promise<SessionListener>;
 }
 
 export class SessionListenerRepository implements ISessionListenerRepository {
@@ -9,7 +9,7 @@ export class SessionListenerRepository implements ISessionListenerRepository {
     this.prisma = prisma;
   }
 
-  async create(session_id: number) {
+  async create(session_id: number, user_id: number) {
     const isSectionActive = await this.prisma.session.findFirst({
       where: { id: session_id, active: true },
     });
@@ -17,7 +17,7 @@ export class SessionListenerRepository implements ISessionListenerRepository {
     if (!isSectionActive) throw new Error(`Section is not active anymore`);
 
     const userHasActiveSession = await this.prisma.session.findFirst({
-      where: { user_id: 2, active: true },
+      where: { user_id, active: true },
     });
 
     if (userHasActiveSession) {
@@ -34,18 +34,30 @@ export class SessionListenerRepository implements ISessionListenerRepository {
     const sessionListenerExists =
       !userHasActiveSession &&
       (await this.prisma.sessionListener.findFirst({
-        where: { session_id, user_id: 2 },
+        where: { session_id, user_id },
       }));
 
     if (sessionListenerExists) throw new Error(`User already on this section`);
 
     const createdSessionListener = await this.prisma.sessionListener.create({
       data: {
-        user_id: 2,
+        user_id,
         session_id,
       },
     });
 
     return createdSessionListener;
+  }
+
+  async getListeners(userId?: number) {
+    const userSession = await this.prisma.sessionListener.findMany({
+      where: { user_id: userId },
+      include: {
+        session: true,
+        user: true,
+      },
+    });
+
+    return userSession;
   }
 }
