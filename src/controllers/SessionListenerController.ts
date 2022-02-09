@@ -18,14 +18,26 @@ class SessionListenerController {
     return response.status(201).json({ sessionListener });
   }
 
+  async index(request: Request, response: Response) {
+    const sessionListenerRepository = new SessionListenerRepository(
+      prismaClient,
+    );
+
+    const sessionListeners =
+      await sessionListenerRepository.getUserListenerSessions(3);
+
+    return response.json({ sessionListeners });
+  }
+
   async get(request: Request, response: Response) {
     const sessionListenerRepository = new SessionListenerRepository(
       prismaClient,
     );
 
-    const sessionListener = await sessionListenerRepository.getListeners(3);
+    const sessionListeners =
+      await sessionListenerRepository.getActiveListenerSessions();
 
-    return response.json({ sessionListener });
+    return response.json({ sessionListeners });
   }
 }
 

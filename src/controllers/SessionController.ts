@@ -19,7 +19,7 @@ class SessionController {
   async index(request: Request, response: Response) {
     const sessionRepository = new SessionRepository(prismaClient);
 
-    const session = await sessionRepository.getUserSession(2);
+    const session = await sessionRepository.getUserActiveSession(2);
 
     return response.json({ session });
   }

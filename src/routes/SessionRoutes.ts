@@ -6,11 +6,16 @@ import { SESSION } from './constants';
 export const sessionRouter = Router();
 
 const { create, index, get } = SessionController;
-const { create: createListener, get: getListeners } = SessionListenerController;
+const {
+  create: createListener,
+  index: getUserListenerSessions,
+  get: getActiveListenerSessions,
+} = SessionListenerController;
 
 sessionRouter.post(SESSION.ROOT, create);
 sessionRouter.get(SESSION.ROOT, index);
 sessionRouter.get(SESSION.ALL, get);
 
 sessionRouter.post(SESSION.LISTENER, createListener);
-sessionRouter.get(SESSION.LISTENER, getListeners);
+sessionRouter.get(SESSION.USER_LISTENERS, getUserListenerSessions);
+sessionRouter.get(SESSION.ACTIVE_LISTENERS, getActiveListenerSessions);

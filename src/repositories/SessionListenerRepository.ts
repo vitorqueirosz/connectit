@@ -2,6 +2,8 @@ import { PrismaClient, SessionListener } from '@prisma/client';
 
 interface ISessionListenerRepository {
   create: (session_id: number, user_id: number) => Promise<SessionListener>;
+  getUserListenerSessions: () => Promise<SessionListener[]>;
+  getActiveListenerSessions: () => Promise<SessionListener[]>;
 }
 
 export class SessionListenerRepository implements ISessionListenerRepository {
@@ -49,11 +51,53 @@ export class SessionListenerRepository implements ISessionListenerRepository {
     return createdSessionListener;
   }
 
-  async getListeners(userId?: number) {
+  async getUserListenerSessions(userId?: number) {
     const userSession = await this.prisma.sessionListener.findMany({
       where: { user_id: userId },
       include: {
-        session: true,
+        session: {
+          include: {
+            sessionMusics: {
+              include: {
+                music: {
+                  include: {
+                    album: true,
+                    artist: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        user: true,
+      },
+    });
+
+    return userSession;
+  }
+
+  async getActiveListenerSessions() {
+    const userSession = await this.prisma.sessionListener.findMany({
+      where: {
+        session: {
+          active: true,
+        },
+      },
+      include: {
+        session: {
+          include: {
+            sessionMusics: {
+              include: {
+                music: {
+                  include: {
+                    album: true,
+                    artist: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         user: true,
       },
     });

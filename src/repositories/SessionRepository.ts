@@ -15,7 +15,10 @@ interface UserSessionResponse extends Session {
 }
 interface ISessionRepository {
   create: (session: ISession) => Promise<Session>;
-  getUserSession: (userId?: number) => Promise<UserSessionResponse | null>;
+  getUserActiveSession: (
+    userId?: number,
+  ) => Promise<UserSessionResponse | null>;
+  getAllActiveSessions: () => Promise<Session[]>;
 }
 
 export class SessionRepository implements ISessionRepository {
@@ -47,11 +50,20 @@ export class SessionRepository implements ISessionRepository {
     return createdSession;
   }
 
-  async getUserSession(userId?: number) {
+  async getUserActiveSession(userId?: number) {
     const userSession = await this.prisma.session.findFirst({
       where: { user_id: userId, active: true },
       include: {
-        sessionMusics: true,
+        sessionMusics: {
+          include: {
+            music: {
+              include: {
+                album: true,
+                artist: true,
+              },
+            },
+          },
+        },
         sessionListeners: {
           include: {
             user: true,
@@ -68,7 +80,16 @@ export class SessionRepository implements ISessionRepository {
     const sessions = await this.prisma.session.findMany({
       where: { active: true },
       include: {
-        sessionMusics: true,
+        sessionMusics: {
+          include: {
+            music: {
+              include: {
+                album: true,
+                artist: true,
+              },
+            },
+          },
+        },
         sessionListeners: {
           include: {
             user: true,
