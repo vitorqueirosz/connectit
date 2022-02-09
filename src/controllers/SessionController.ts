@@ -16,12 +16,20 @@ class SessionController {
     return response.status(201).json({ session });
   }
 
-  async get(request: Request, response: Response) {
+  async index(request: Request, response: Response) {
     const sessionRepository = new SessionRepository(prismaClient);
 
     const session = await sessionRepository.getUserSession(2);
 
     return response.json({ session });
+  }
+
+  async get(request: Request, response: Response) {
+    const sessionRepository = new SessionRepository(prismaClient);
+
+    const sessions = await sessionRepository.getAllActiveSessions();
+
+    return response.json({ sessions });
   }
 }
 

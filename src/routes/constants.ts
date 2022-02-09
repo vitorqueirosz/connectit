@@ -6,6 +6,7 @@ const USER = {
 const SESSION = {
   ROOT: '/',
   BASE: '/sessions',
+  ALL: '/all',
   LISTENER: '/session-listener',
 };
 

@@ -52,11 +52,32 @@ export class SessionRepository implements ISessionRepository {
       where: { user_id: userId, active: true },
       include: {
         sessionMusics: true,
-        sessionListeners: true,
+        sessionListeners: {
+          include: {
+            user: true,
+          },
+        },
         user: true,
       },
     });
 
     return userSession;
+  }
+
+  async getAllActiveSessions() {
+    const sessions = await this.prisma.session.findMany({
+      where: { active: true },
+      include: {
+        sessionMusics: true,
+        sessionListeners: {
+          include: {
+            user: true,
+          },
+        },
+        user: true,
+      },
+    });
+
+    return sessions;
   }
 }
