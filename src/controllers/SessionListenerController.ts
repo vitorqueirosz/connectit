@@ -5,15 +5,16 @@ import { prismaClient } from 'services/prisma';
 class SessionListenerController {
   async create(request: Request, response: Response) {
     const { session_id } = request.body;
+    const user_id = request.user.id;
 
     const sessionListenerRepository = new SessionListenerRepository(
       prismaClient,
     );
 
-    const sessionListener = await sessionListenerRepository.create(
+    const sessionListener = await sessionListenerRepository.create({
       session_id,
-      4,
-    );
+      user_id,
+    });
 
     return response.status(201).json({ sessionListener });
   }
@@ -22,9 +23,10 @@ class SessionListenerController {
     const sessionListenerRepository = new SessionListenerRepository(
       prismaClient,
     );
+    const user_id = request.user.id;
 
     const sessionListeners =
-      await sessionListenerRepository.getUserListenerSessions(3);
+      await sessionListenerRepository.getUserListenerSessions(user_id);
 
     return response.json({ sessionListeners });
   }
@@ -44,9 +46,10 @@ class SessionListenerController {
     const sessionListenerRepository = new SessionListenerRepository(
       prismaClient,
     );
+    const user_id = request.user.id;
 
     const sessionListener =
-      await sessionListenerRepository.getActiveUserListenerSession(3);
+      await sessionListenerRepository.getActiveUserListenerSession(user_id);
 
     return response.json({ sessionListener });
   }

@@ -12,7 +12,7 @@ class SessionController {
 
     const session = await sessionRepository.create({
       session: sessionData,
-      user_id: Number(user_id),
+      user_id,
     });
 
     return response.status(201).json({ session });
@@ -22,9 +22,7 @@ class SessionController {
     const sessionRepository = new SessionRepository(prismaClient);
     const user_id = request.user.id;
 
-    const session = await sessionRepository.getUserActiveSession(
-      Number(user_id),
-    );
+    const session = await sessionRepository.getUserActiveSession(user_id);
 
     return response.json({ session });
   }
@@ -41,9 +39,7 @@ class SessionController {
     const sessionRepository = new SessionRepository(prismaClient);
     const user_id = request.user.id;
 
-    const sessions = await sessionRepository.getAllUserSessions(
-      Number(user_id),
-    );
+    const sessions = await sessionRepository.getAllUserSessions(user_id);
 
     return response.json({ sessions });
   }

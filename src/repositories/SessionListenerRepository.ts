@@ -11,8 +11,13 @@ export interface SessionListenerResponse extends SessionListener {
   session: Omit<SessionResponse, 'sessionListeners'> | null;
   user: User | null;
 }
+
+interface SessionListenerPayload {
+  session_id: number;
+  user_id: number;
+}
 interface ISessionListenerRepository {
-  create: (session_id: number, user_id: number) => Promise<SessionListener>;
+  create: (sessionPayload: SessionListenerPayload) => Promise<SessionListener>;
   getUserListenerSessions: () => Promise<(FormatedSessionListener | null)[]>;
   getActiveListenerSessions: () => Promise<(FormatedSessionListener | null)[]>;
   getActiveUserListenerSession: (
@@ -68,7 +73,7 @@ export class SessionListenerRepository implements ISessionListenerRepository {
     return formatSessionListener(userSession);
   }
 
-  async create(session_id: number, user_id: number) {
+  async create({ session_id, user_id }: SessionListenerPayload) {
     const isSectionActive = await this.prisma.session.findFirst({
       where: { id: session_id, active: true },
     });

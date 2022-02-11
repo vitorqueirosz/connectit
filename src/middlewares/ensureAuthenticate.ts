@@ -24,7 +24,7 @@ export const ensureAuthenticated = (
 
     const { sub } = decoded;
 
-    request.user = { id: sub as string };
+    request.user = { id: Number(sub) };
 
     return next();
   } catch (error) {
