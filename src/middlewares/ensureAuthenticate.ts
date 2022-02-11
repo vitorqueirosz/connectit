@@ -30,6 +30,6 @@ export const ensureAuthenticated = (
   } catch (error) {
     return response
       .status(401)
-      .json({ code: UNAUTHORIZED, error: error.message });
+      .json({ code: UNAUTHORIZED, error: 'JWT token is invalid' });
   }
 };
