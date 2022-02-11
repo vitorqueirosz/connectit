@@ -1,3 +1,5 @@
+import { Album, Artist, Music } from '@prisma/client';
+
 export interface ISession {
   musicId: string;
   musicName: string;
@@ -13,4 +15,9 @@ export interface ISession {
 
 export interface ISessionMusic extends ISession {
   session_id: number;
+}
+
+export interface MusicResponse extends Music {
+  album: Album | null;
+  artist: Artist | null;
 }

@@ -5,20 +5,30 @@ import {
   SessionMusic,
   User,
 } from '@prisma/client';
-import { ISession } from 'interfaces/Session';
+import { DEFAULT_USER_OBJECT } from 'constants/global';
+import { ISession, MusicResponse } from 'interfaces/Session';
+import {
+  FormatedSession,
+  formatSession,
+  formatSessions,
+} from 'utils/formatSession';
 import { SessionMusicRepository } from './SessionMusicRepository';
 
-interface UserSessionResponse extends Session {
-  sessionMusics: SessionMusic[];
-  sessionListeners: SessionListener[];
+export interface SessionMusicPayload extends SessionMusic {
+  music: MusicResponse | null;
+}
+export interface SessionResponse extends Session {
+  sessionMusics: SessionMusicPayload[];
+  sessionListeners: (SessionListener & {
+    user: User | null;
+  })[];
   user: User | null;
 }
+
 interface ISessionRepository {
   create: (session: ISession) => Promise<Session>;
-  getUserActiveSession: (
-    userId?: number,
-  ) => Promise<UserSessionResponse | null>;
-  getAllActiveSessions: () => Promise<Session[]>;
+  getUserActiveSession: (userId?: number) => Promise<FormatedSession | null>;
+  getAllActiveSessions: () => Promise<(FormatedSession | null)[]>;
 }
 
 export class SessionRepository implements ISessionRepository {
@@ -55,6 +65,10 @@ export class SessionRepository implements ISessionRepository {
       where: { user_id: userId, active: true },
       include: {
         sessionMusics: {
+          orderBy: {
+            created_at: 'desc',
+          },
+          take: 1,
           include: {
             music: {
               include: {
@@ -66,14 +80,22 @@ export class SessionRepository implements ISessionRepository {
         },
         sessionListeners: {
           include: {
-            user: true,
+            user: {
+              select: {
+                ...DEFAULT_USER_OBJECT,
+              },
+            },
           },
         },
-        user: true,
+        user: {
+          select: {
+            ...DEFAULT_USER_OBJECT,
+          },
+        },
       },
     });
 
-    return userSession;
+    return formatSession(userSession);
   }
 
   async getAllActiveSessions() {
@@ -81,6 +103,10 @@ export class SessionRepository implements ISessionRepository {
       where: { active: true },
       include: {
         sessionMusics: {
+          orderBy: {
+            created_at: 'desc',
+          },
+          take: 1,
           include: {
             music: {
               include: {
@@ -92,13 +118,21 @@ export class SessionRepository implements ISessionRepository {
         },
         sessionListeners: {
           include: {
-            user: true,
+            user: {
+              select: {
+                ...DEFAULT_USER_OBJECT,
+              },
+            },
           },
         },
-        user: true,
+        user: {
+          select: {
+            ...DEFAULT_USER_OBJECT,
+          },
+        },
       },
     });
 
-    return sessions;
+    return formatSessions(sessions);
   }
 }

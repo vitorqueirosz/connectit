@@ -1,9 +1,19 @@
-import { PrismaClient, SessionListener } from '@prisma/client';
+import { PrismaClient, SessionListener, User } from '@prisma/client';
+import { DEFAULT_USER_OBJECT } from 'constants/global';
+import {
+  FormatedSessionListener,
+  formatSessionListeners,
+} from 'utils/formatSession';
+import { SessionResponse } from './SessionRepository';
 
+export interface SessionListenerResponse extends SessionListener {
+  session: Omit<SessionResponse, 'sessionListeners'> | null;
+  user: User | null;
+}
 interface ISessionListenerRepository {
   create: (session_id: number, user_id: number) => Promise<SessionListener>;
-  getUserListenerSessions: () => Promise<SessionListener[]>;
-  getActiveListenerSessions: () => Promise<SessionListener[]>;
+  getUserListenerSessions: () => Promise<(FormatedSessionListener | null)[]>;
+  getActiveListenerSessions: () => Promise<(FormatedSessionListener | null)[]>;
 }
 
 export class SessionListenerRepository implements ISessionListenerRepository {
@@ -58,6 +68,10 @@ export class SessionListenerRepository implements ISessionListenerRepository {
         session: {
           include: {
             sessionMusics: {
+              orderBy: {
+                created_at: 'desc',
+              },
+              take: 1,
               include: {
                 music: {
                   include: {
@@ -67,13 +81,22 @@ export class SessionListenerRepository implements ISessionListenerRepository {
                 },
               },
             },
+            user: {
+              select: {
+                ...DEFAULT_USER_OBJECT,
+              },
+            },
           },
         },
-        user: true,
+        user: {
+          select: {
+            ...DEFAULT_USER_OBJECT,
+          },
+        },
       },
     });
 
-    return userSession;
+    return formatSessionListeners(userSession);
   }
 
   async getActiveListenerSessions() {
@@ -87,6 +110,10 @@ export class SessionListenerRepository implements ISessionListenerRepository {
         session: {
           include: {
             sessionMusics: {
+              orderBy: {
+                created_at: 'desc',
+              },
+              take: 1,
               include: {
                 music: {
                   include: {
@@ -96,12 +123,21 @@ export class SessionListenerRepository implements ISessionListenerRepository {
                 },
               },
             },
+            user: {
+              select: {
+                ...DEFAULT_USER_OBJECT,
+              },
+            },
           },
         },
-        user: true,
+        user: {
+          select: {
+            ...DEFAULT_USER_OBJECT,
+          },
+        },
       },
     });
 
-    return userSession;
+    return formatSessionListeners(userSession);
   }
 }
