@@ -6,11 +6,13 @@ import { prismaClient } from 'services/prisma';
 class SessionController {
   async create(request: Request, response: Response) {
     const sessionData: ISession = request.body;
+    const user_id = request.user.id;
 
     const sessionRepository = new SessionRepository(prismaClient);
 
     const session = await sessionRepository.create({
-      ...sessionData,
+      session: sessionData,
+      user_id: Number(user_id),
     });
 
     return response.status(201).json({ session });
@@ -18,8 +20,11 @@ class SessionController {
 
   async index(request: Request, response: Response) {
     const sessionRepository = new SessionRepository(prismaClient);
+    const user_id = request.user.id;
 
-    const session = await sessionRepository.getUserActiveSession(2);
+    const session = await sessionRepository.getUserActiveSession(
+      Number(user_id),
+    );
 
     return response.json({ session });
   }
@@ -34,8 +39,11 @@ class SessionController {
 
   async getAllUserSessions(request: Request, response: Response) {
     const sessionRepository = new SessionRepository(prismaClient);
+    const user_id = request.user.id;
 
-    const sessions = await sessionRepository.getAllUserSessions(2);
+    const sessions = await sessionRepository.getAllUserSessions(
+      Number(user_id),
+    );
 
     return response.json({ sessions });
   }

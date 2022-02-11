@@ -25,9 +25,14 @@ export interface SessionResponse extends Session {
   user: User | null;
 }
 
+interface SessionPayload {
+  session: ISession;
+  user_id: number;
+}
+
 interface ISessionRepository {
-  create: (session: ISession) => Promise<Session>;
-  getUserActiveSession: (userId?: number) => Promise<FormatedSession | null>;
+  create: (sessionPayload: SessionPayload) => Promise<Session>;
+  getUserActiveSession: (userId: number) => Promise<FormatedSession | null>;
   getAllActiveSessions: () => Promise<(FormatedSession | null)[]>;
 }
 
@@ -36,9 +41,9 @@ export class SessionRepository implements ISessionRepository {
     this.prisma = prisma;
   }
 
-  async create(session: ISession) {
+  async create({ session, user_id }: SessionPayload) {
     const hasSessionActive = await this.prisma.session.findFirst({
-      where: { user_id: 2, active: true },
+      where: { user_id, active: true },
     });
 
     if (hasSessionActive) throw new Error(`User already has a active session`);
@@ -47,7 +52,7 @@ export class SessionRepository implements ISessionRepository {
 
     const createdSession = await this.prisma.session.create({
       data: {
-        user_id: 2,
+        user_id,
         active: true,
       },
     });
@@ -60,9 +65,9 @@ export class SessionRepository implements ISessionRepository {
     return createdSession;
   }
 
-  async getUserActiveSession(userId?: number) {
+  async getUserActiveSession(user_id: number) {
     const userSession = await this.prisma.session.findFirst({
-      where: { user_id: userId, active: true },
+      where: { user_id, active: true },
       include: {
         sessionMusics: {
           orderBy: {
