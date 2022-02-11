@@ -135,4 +135,42 @@ export class SessionRepository implements ISessionRepository {
 
     return formatSessions(sessions);
   }
+
+  async getAllUserSessions(user_id: number) {
+    const sessions = await this.prisma.session.findMany({
+      where: { user_id },
+      include: {
+        sessionMusics: {
+          orderBy: {
+            created_at: 'desc',
+          },
+          take: 1,
+          include: {
+            music: {
+              include: {
+                album: true,
+                artist: true,
+              },
+            },
+          },
+        },
+        sessionListeners: {
+          include: {
+            user: {
+              select: {
+                ...DEFAULT_USER_OBJECT,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            ...DEFAULT_USER_OBJECT,
+          },
+        },
+      },
+    });
+
+    return formatSessions(sessions);
+  }
 }

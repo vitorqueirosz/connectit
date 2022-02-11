@@ -2,6 +2,7 @@ import { PrismaClient, SessionListener, User } from '@prisma/client';
 import { DEFAULT_USER_OBJECT } from 'constants/global';
 import {
   FormatedSessionListener,
+  formatSessionListener,
   formatSessionListeners,
 } from 'utils/formatSession';
 import { SessionResponse } from './SessionRepository';
@@ -14,11 +15,57 @@ interface ISessionListenerRepository {
   create: (session_id: number, user_id: number) => Promise<SessionListener>;
   getUserListenerSessions: () => Promise<(FormatedSessionListener | null)[]>;
   getActiveListenerSessions: () => Promise<(FormatedSessionListener | null)[]>;
+  getActiveUserListenerSession: (
+    user_id: number,
+  ) => Promise<FormatedSessionListener | null>;
 }
 
 export class SessionListenerRepository implements ISessionListenerRepository {
   constructor(private prisma: PrismaClient) {
     this.prisma = prisma;
+  }
+
+  async getActiveUserListenerSession(user_id: number) {
+    const userSession = await this.prisma.sessionListener.findFirst({
+      where: {
+        user_id,
+        session: {
+          active: true,
+        },
+      },
+      include: {
+        session: {
+          include: {
+            sessionMusics: {
+              orderBy: {
+                created_at: 'desc',
+              },
+              take: 1,
+              include: {
+                music: {
+                  include: {
+                    album: true,
+                    artist: true,
+                  },
+                },
+              },
+            },
+            user: {
+              select: {
+                ...DEFAULT_USER_OBJECT,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            ...DEFAULT_USER_OBJECT,
+          },
+        },
+      },
+    });
+
+    return formatSessionListener(userSession);
   }
 
   async create(session_id: number, user_id: number) {

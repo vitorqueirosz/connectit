@@ -31,6 +31,14 @@ class SessionController {
 
     return response.json({ sessions });
   }
+
+  async getAllUserSessions(request: Request, response: Response) {
+    const sessionRepository = new SessionRepository(prismaClient);
+
+    const sessions = await sessionRepository.getAllUserSessions(2);
+
+    return response.json({ sessions });
+  }
 }
 
 export default new SessionController();
