@@ -1,5 +1,5 @@
 import { compare, hash } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 
 interface IAuthenticationService {
   comparePasswords: (
@@ -30,5 +30,9 @@ export class AuthenticationService implements IAuthenticationService {
     });
 
     return token;
+  }
+
+  decodeToken(token: string) {
+    return verify(token, '56983a4f996bdd76b1fa39e419f0ca80');
   }
 }
