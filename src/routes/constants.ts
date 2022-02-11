@@ -1,6 +1,7 @@
 const USER = {
   ROOT: '/',
   BASE: '/users',
+  LOGIN: '/login',
 };
 
 const SESSION = {

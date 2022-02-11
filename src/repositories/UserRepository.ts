@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { DEFAULT_USER_OBJECT } from 'constants/global';
 import { IUser } from 'interfaces/User';
-import { AuthenticationRepository } from './AuthenticationRepository';
+import { AuthenticationService } from 'services/AuthenticationService';
+import { UserService } from 'services/UserService';
 
 interface IUserRepository {
   create: (user: IUser) => Promise<IUser>;
@@ -16,20 +17,20 @@ export class UserRepository implements IUserRepository {
   // async update(userId: string) {}
 
   async create(user: IUser) {
-    const userExists = await this.prisma.user.findFirst({
-      where: { email: user.email },
-    });
+    const userService = new UserService(this.prisma);
+
+    const userExists = await userService.findUserByEmail(user.email);
 
     if (userExists) throw new Error(`User ${user.email} already exists`);
 
     if (user.password !== user.confirmPassword)
       throw new Error('Passwords doesnt match');
 
-    const authenticationRepository = new AuthenticationRepository();
+    const authenticationService = new AuthenticationService();
 
     delete user.confirmPassword;
 
-    const hashedPassword = await authenticationRepository.setPasswordHash(
+    const hashedPassword = await authenticationService.setPasswordHash(
       user.password,
     );
 

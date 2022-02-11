@@ -1,34 +1,47 @@
-import { compare, hash } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
+import { PrismaClient, User } from '@prisma/client';
+import { AuthenticationService } from 'services/AuthenticationService';
+import { UserService } from 'services/UserService';
 
+interface AuthenticationResponse {
+  user: User;
+  token: string;
+}
+
+interface AuthenticationPayload {
+  email: string;
+  password: string;
+}
 interface IAuthenticationRepository {
-  comparePasswords: (
-    password: string,
-    hashedPassword: string,
-  ) => Promise<boolean>;
-  setPasswordHash: (password: string) => Promise<string>;
-  generateToken: (user_id: string) => string;
+  authenticate: (
+    payload: AuthenticationPayload,
+  ) => Promise<AuthenticationResponse>;
 }
 
 export class AuthenticationRepository implements IAuthenticationRepository {
-  async comparePasswords(password: string, hashedPassword: string) {
-    const isPasswordsEqual = compare(password, hashedPassword);
-
-    return isPasswordsEqual;
+  constructor(private prisma: PrismaClient) {
+    this.prisma = prisma;
   }
 
-  setPasswordHash(password: string, salt = 8) {
-    const hashedPassword = hash(password, salt);
+  async authenticate({ email, password }: AuthenticationPayload) {
+    const userService = new UserService(this.prisma);
+    const authenticationService = new AuthenticationService();
 
-    return hashedPassword;
-  }
+    const userExists = await userService.findUserByEmail(email);
 
-  generateToken(user_id: string) {
-    const token = sign({}, '56983a4f996bdd76b1fa39e419f0ca80', {
-      subject: user_id,
-      expiresIn: '7d',
-    });
+    if (!userExists) throw new Error('Invalid credentials');
 
-    return token;
+    const compareUserPasswords = await authenticationService.comparePasswords(
+      password,
+      userExists.password,
+    );
+
+    if (!compareUserPasswords) throw new Error('Invalid credentials');
+
+    const userToken = authenticationService.generateToken(userExists.id);
+
+    return {
+      user: userExists,
+      token: userToken,
+    };
   }
 }
