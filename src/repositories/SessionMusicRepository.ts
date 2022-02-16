@@ -90,6 +90,14 @@ export class SessionMusicRepository implements ISessionMusicRepository {
         session_id,
         music_id: musicData.id,
       },
+      include: {
+        music: {
+          include: {
+            album: true,
+            artist: true,
+          },
+        },
+      },
     });
 
     return createdSessionMusic;

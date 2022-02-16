@@ -1,11 +1,12 @@
 import { PrismaClient, SessionListener, User } from '@prisma/client';
 import { DEFAULT_USER_OBJECT } from 'constants/global';
+import { prismaClient } from 'services/prisma';
 import {
   FormatedSessionListener,
   formatSessionListener,
   formatSessionListeners,
 } from 'utils/formatSession';
-import { SessionResponse } from './SessionRepository';
+import { SessionRepository, SessionResponse } from './SessionRepository';
 
 export interface SessionListenerResponse extends SessionListener {
   session: Omit<SessionResponse, 'sessionListeners'> | null;
@@ -85,14 +86,8 @@ export class SessionListenerRepository implements ISessionListenerRepository {
     });
 
     if (userHasActiveSession) {
-      await this.prisma.session.update({
-        where: {
-          id: userHasActiveSession.id,
-        },
-        data: {
-          active: false,
-        },
-      });
+      const sessionRepository = new SessionRepository(prismaClient);
+      sessionRepository.inativeUserSession(userHasActiveSession.id);
     }
 
     const sessionListenerExists =

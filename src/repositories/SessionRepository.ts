@@ -34,6 +34,7 @@ interface ISessionRepository {
   create: (sessionPayload: SessionPayload) => Promise<Session>;
   getUserActiveSession: (userId: number) => Promise<FormatedSession | null>;
   getAllActiveSessions: () => Promise<(FormatedSession | null)[]>;
+  inativeUserSession: (session_id: number) => Promise<Session>;
 }
 
 export class SessionRepository implements ISessionRepository {
@@ -55,14 +56,45 @@ export class SessionRepository implements ISessionRepository {
         user_id,
         active: true,
       },
+      include: {
+        sessionMusics: {
+          include: {
+            music: {
+              include: {
+                album: true,
+                artist: true,
+              },
+            },
+          },
+        },
+        sessionListeners: {
+          include: {
+            user: {
+              select: {
+                ...DEFAULT_USER_OBJECT,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            ...DEFAULT_USER_OBJECT,
+          },
+        },
+      },
     });
 
-    await sessionMusicRepository.create({
+    const sessionMusic = await sessionMusicRepository.create({
       ...session,
       session_id: createdSession.id,
     });
 
-    return createdSession;
+    const sessionWithSessionMusic = {
+      ...createdSession,
+      sessionMusics: [sessionMusic],
+    };
+
+    return sessionWithSessionMusic;
   }
 
   async getUserActiveSession(user_id: number) {
@@ -177,5 +209,18 @@ export class SessionRepository implements ISessionRepository {
     });
 
     return formatSessions(sessions);
+  }
+
+  async inativeUserSession(session_id: number) {
+    const activeSession = await this.prisma.session.update({
+      where: {
+        id: session_id,
+      },
+      data: {
+        active: false,
+      },
+    });
+
+    return activeSession;
   }
 }
