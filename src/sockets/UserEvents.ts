@@ -9,6 +9,7 @@ import {
 import { api } from 'services/axios';
 import { prismaClient } from 'services/prisma';
 import { Server, Socket } from 'socket.io';
+import { setTimeOut } from 'utils/asyncTimeOut';
 
 interface WatchUserSessionPayload {
   user_id: number;
@@ -22,6 +23,7 @@ interface WatchCurrentPlayingTrackPayload {
 }
 
 const USER_SESSION = 'user_session';
+const STOP_SESSION = 'stop_session';
 const GET_CURRENTLY_PLAYING_TRACK = '/me/player/currently-playing';
 
 const fetchCurrentPlayingTrack = async (spotify_token: string) => {
@@ -53,25 +55,39 @@ const seriealizeTrackFromSpotify = (trackPayload: TrackPayload) => {
   return data;
 };
 
+let keepRunning: boolean;
+
 const watchCurrentPlayingTrack = ({
   socket,
   session,
   spotify_token,
 }: WatchCurrentPlayingTrackPayload) => {
   const sessionMusicRepository = new SessionMusicRepository(prismaClient);
+  keepRunning = true;
 
-  setInterval(async () => {
+  const interval = setInterval(async () => {
     const [currentSessionMusic] = session.sessionMusics;
 
+    if (!keepRunning) return;
+
     const currentTrack = await fetchCurrentPlayingTrack(spotify_token);
+
     const hasMusicChanged =
       currentTrack.item.id !== currentSessionMusic.music?.id;
     const isMusicStillPlaying = currentTrack.is_playing;
 
-    // console.log(session.sessionMusics[0].music);
+    // console.log({ old: session.sessionMusics[0].music?.name });
+
+    if (!isMusicStillPlaying) {
+      socket.emit(STOP_SESSION);
+      clearInterval(interval);
+    }
 
     if (hasMusicChanged && isMusicStillPlaying) {
       const formatedTrack = seriealizeTrackFromSpotify(currentTrack);
+
+      keepRunning = false;
+      await setTimeOut(3000);
 
       const sessionMusic = await sessionMusicRepository.create({
         ...formatedTrack,
@@ -79,8 +95,9 @@ const watchCurrentPlayingTrack = ({
       });
 
       session.sessionMusics = [sessionMusic];
+      keepRunning = true;
 
-      // console.log(session.sessionMusics[0].music);
+      // console.log({ new: session.sessionMusics[0].music?.name });
 
       socket.emit(USER_SESSION, session);
     }
