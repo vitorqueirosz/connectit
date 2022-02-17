@@ -35,6 +35,7 @@ const seriealizeTrackFromSpotify = (trackPayload: TrackPayload) => {
   const data: ISession = {
     musicId: item.id,
     musicName: item.name,
+    musicUri: item.uri,
     artistId: item.artists[0].id,
     artistName: item.artists[0].name,
     artistImage: item.artists[0].href,

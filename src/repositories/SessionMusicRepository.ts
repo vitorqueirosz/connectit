@@ -24,6 +24,7 @@ export class SessionMusicRepository implements ISessionMusicRepository {
     const {
       musicId,
       musicName,
+      musicUri,
       artistId,
       artistName,
       artistImage,
@@ -77,6 +78,7 @@ export class SessionMusicRepository implements ISessionMusicRepository {
           duration,
           album_id: albumData.id,
           artist_id: artistData.id,
+          uri: musicUri,
         },
       });
 

@@ -3,6 +3,7 @@ import { Album, Artist, Music } from '@prisma/client';
 export interface ISession {
   musicId: string;
   musicName: string;
+  musicUri: string;
   artistId: string;
   artistName: string;
   artistImage: string;
