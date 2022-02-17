@@ -1,26 +1,15 @@
 import { START_USER_SESSION } from 'constants/events';
 import { ISession } from 'interfaces/Session';
 import { TrackPayload } from 'interfaces/Spotify';
-import { SessionMusicRepository } from 'repositories/SessionMusicRepository';
 import {
-  SessionRepository,
-  SessionResponse,
-} from 'repositories/SessionRepository';
-import { api } from 'services/axios';
-import { prismaClient } from 'services/prisma';
+  WatchCurrentPlayingTrackPayload,
+  WatchUserSessionPayload,
+} from 'interfaces/User';
+import { SessionMusicRepository } from 'repositories/SessionMusicRepository';
+import { SessionRepository } from 'repositories/SessionRepository';
+import { api, prismaClient } from 'services';
 import { Server, Socket } from 'socket.io';
 import { setTimeOut } from 'utils/asyncTimeOut';
-
-interface WatchUserSessionPayload {
-  user_id: number;
-  spotify_token: string;
-}
-
-interface WatchCurrentPlayingTrackPayload {
-  socket: Socket;
-  session: SessionResponse;
-  spotify_token: string;
-}
 
 const USER_SESSION = 'user_session';
 const STOP_SESSION = 'stop_session';

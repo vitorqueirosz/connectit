@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { SessionListenerRepository } from 'repositories/SessionListenerRepository';
-import { prismaClient } from 'services/prisma';
+import { prismaClient } from 'services';
 
 class SessionListenerController {
   async create(request: Request, response: Response) {

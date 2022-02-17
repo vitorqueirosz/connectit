@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ISession } from 'interfaces/Session';
 import { SessionRepository } from 'repositories/SessionRepository';
-import { prismaClient } from 'services/prisma';
+import { prismaClient } from 'services';
 
 class SessionController {
   async create(request: Request, response: Response) {

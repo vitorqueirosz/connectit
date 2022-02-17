@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { UserRepository } from 'repositories/UserRepository';
-import { prismaClient } from 'services/prisma';
+import { prismaClient } from 'services';
 
 class UserController {
   async create(request: Request, response: Response) {

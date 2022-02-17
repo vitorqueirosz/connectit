@@ -1,6 +1,5 @@
 import { PrismaClient, User } from '@prisma/client';
-import { AuthenticationService } from 'services/AuthenticationService';
-import { UserService } from 'services/UserService';
+import { UserService, AuthenticationService } from 'services';
 
 interface AuthenticationResponse {
   user: User;

@@ -1,6 +1,6 @@
 import { INTERNAL_ERROR, UNAUTHORIZED } from 'constants/codes';
 import { NextFunction, Request, Response } from 'express';
-import { AuthenticationService } from 'services/AuthenticationService';
+import { AuthenticationService } from 'services';
 
 export const ensureAuthenticated = (
   request: Request,

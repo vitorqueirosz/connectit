@@ -1,8 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { DEFAULT_USER_OBJECT } from 'constants/global';
 import { IUser } from 'interfaces/User';
-import { AuthenticationService } from 'services/AuthenticationService';
-import { UserService } from 'services/UserService';
+import { UserService, AuthenticationService } from 'services';
 
 interface IUserRepository {
   create: (user: IUser) => Promise<IUser>;
