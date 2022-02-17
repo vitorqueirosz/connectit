@@ -48,6 +48,7 @@ model Music {
   id String @unique
   name  String
   duration Int
+  music_uri String
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
   album    Album?   @relation(fields: [album_id], references: [id])
