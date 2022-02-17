@@ -16,3 +16,10 @@ export interface WatchCurrentPlayingTrackPayload {
   session: SessionResponse;
   spotify_token: string;
 }
+
+export interface WatchUserListenerPayload {
+  user_id: number;
+  session_id: number;
+  spotify_token: string;
+  music_uri: string;
+}

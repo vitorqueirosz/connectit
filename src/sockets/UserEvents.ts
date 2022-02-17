@@ -3,6 +3,7 @@ import { ISession } from 'interfaces/Session';
 import { TrackPayload } from 'interfaces/Spotify';
 import {
   WatchCurrentPlayingTrackPayload,
+  WatchUserListenerPayload,
   WatchUserSessionPayload,
 } from 'interfaces/User';
 import { SessionMusicRepository } from 'repositories/SessionMusicRepository';
@@ -12,8 +13,11 @@ import { Server, Socket } from 'socket.io';
 import { setTimeOut } from 'utils/asyncTimeOut';
 
 const USER_SESSION = 'user_session';
+const USER_LISTENER = 'user_listener';
 const STOP_SESSION = 'stop_session';
+
 const GET_CURRENTLY_PLAYING_TRACK = '/me/player/currently-playing';
+const SET_NEW_PLAY_TRACK = '/me/player/currently-playing';
 
 const fetchCurrentPlayingTrack = async (spotify_token: string) => {
   const { data } = await api.get<TrackPayload>(GET_CURRENTLY_PLAYING_TRACK, {
@@ -44,15 +48,13 @@ const seriealizeTrackFromSpotify = (trackPayload: TrackPayload) => {
   return data;
 };
 
-let keepRunning: boolean;
-
 const watchCurrentPlayingTrack = ({
   socket,
   session,
   spotify_token,
 }: WatchCurrentPlayingTrackPayload) => {
   const sessionMusicRepository = new SessionMusicRepository(prismaClient);
-  keepRunning = true;
+  let keepRunning = true;
 
   const interval = setInterval(async () => {
     const [currentSessionMusic] = session.sessionMusics;
@@ -93,6 +95,16 @@ const watchCurrentPlayingTrack = ({
   }, 1000);
 };
 
+const setNewPlayTrack = (music_uri: string, spotify_token: string) => {
+  const payload = { uris: [music_uri] };
+
+  return api.put(SET_NEW_PLAY_TRACK, payload, {
+    headers: {
+      Authorization: `Bearer ${spotify_token}`,
+    },
+  });
+};
+
 export const registerUserEvents = async (io: Server, socket: Socket) => {
   const watchUserSession = async (data: WatchUserSessionPayload) => {
     const userSession = await fetchCurrentPlayingTrack(data.spotify_token);
@@ -112,5 +124,11 @@ export const registerUserEvents = async (io: Server, socket: Socket) => {
     });
   };
 
+  const watchUserListener = (data: WatchUserListenerPayload) => {
+    setNewPlayTrack(data.music_uri, data.spotify_token);
+  };
+
   socket.on(START_USER_SESSION, watchUserSession);
+
+  socket.on(USER_LISTENER, watchUserListener);
 };

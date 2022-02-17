@@ -14,8 +14,6 @@ export class UserService implements IUserService {
       where: { email },
     });
 
-    if (!user) return null;
-
     return user;
   }
 }
