@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
 import { SessionResponse } from 'repositories/SessionRepository';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 export interface IUser extends User {
   confirmPassword?: string;
@@ -13,6 +13,7 @@ export interface WatchUserSessionPayload {
 
 export interface WatchCurrentPlayingTrackPayload {
   socket: Socket;
+  io: Server;
   session: SessionResponse;
   spotify_token: string;
 }

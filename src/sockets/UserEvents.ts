@@ -12,7 +12,8 @@ import { api, prismaClient } from 'services';
 import { Server, Socket } from 'socket.io';
 import { setTimeOut } from 'utils/asyncTimeOut';
 
-const USER_SESSION = 'user_session';
+const SESSION_CHANGED = 'session_changed';
+const MUSIC_CHANGED = 'music_changed';
 const USER_LISTENER = 'user_listener';
 const STOP_SESSION = 'stop_session';
 
@@ -51,6 +52,7 @@ const seriealizeTrackFromSpotify = (trackPayload: TrackPayload) => {
 
 const watchCurrentPlayingTrack = ({
   socket,
+  io,
   session,
   spotify_token,
 }: WatchCurrentPlayingTrackPayload) => {
@@ -91,12 +93,15 @@ const watchCurrentPlayingTrack = ({
 
       // console.log({ new: session.sessionMusics[0].music?.name });
 
-      socket.emit(USER_SESSION, session);
+      io.emit(SESSION_CHANGED, session.id);
+      socket
+        .to(String(session.id))
+        .emit(MUSIC_CHANGED, String(currentSessionMusic.music?.uri));
     }
   }, 1000);
 };
 
-const setNewPlayTrack = (music_uri: string, spotify_token: string) => {
+const setNewPlayTrack = async (music_uri: string, spotify_token: string) => {
   const payload = { uris: [music_uri] };
 
   return api.put(SET_NEW_PLAY_TRACK, payload, {
@@ -120,13 +125,16 @@ export const registerUserEvents = async (io: Server, socket: Socket) => {
 
     watchCurrentPlayingTrack({
       session,
+      io,
       socket,
       spotify_token: data.spotify_token,
     });
   };
 
-  const watchUserListener = (data: WatchUserListenerPayload) => {
-    setNewPlayTrack(data.music_uri, data.spotify_token);
+  const watchUserListener = async (data: WatchUserListenerPayload) => {
+    await setNewPlayTrack(data.music_uri, data.spotify_token);
+
+    socket.join(String(data.session_id));
   };
 
   socket.on(START_USER_SESSION, watchUserSession);
