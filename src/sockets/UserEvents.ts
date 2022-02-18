@@ -14,8 +14,8 @@ import { setTimeOut } from 'utils/asyncTimeOut';
 
 const SESSION_CHANGED = 'session_changed';
 const MUSIC_CHANGED = 'music_changed';
+const SESSION_FINISHED = 'session_finished';
 const USER_LISTENER = 'user_listener';
-const STOP_SESSION = 'stop_session';
 
 const GET_CURRENTLY_PLAYING_TRACK = '/me/player/currently-playing';
 const SET_NEW_PLAY_TRACK = '/me/player/currently-playing';
@@ -57,6 +57,10 @@ const watchCurrentPlayingTrack = ({
   spotify_token,
 }: WatchCurrentPlayingTrackPayload) => {
   const sessionMusicRepository = new SessionMusicRepository(prismaClient);
+  const sessionRepository = new SessionRepository(prismaClient);
+
+  const emitSessionChangeToAll = () => io.emit(SESSION_CHANGED, session.id);
+
   let keepRunning = true;
 
   const interval = setInterval(async () => {
@@ -73,7 +77,10 @@ const watchCurrentPlayingTrack = ({
     // console.log({ old: session.sessionMusics[0].music?.name });
 
     if (!isMusicStillPlaying) {
-      socket.emit(STOP_SESSION);
+      await sessionRepository.inativeUserSession(session.id);
+
+      emitSessionChangeToAll();
+      socket.to(String(session.id)).emit(SESSION_FINISHED, 'stop');
       clearInterval(interval);
     }
 
@@ -93,7 +100,7 @@ const watchCurrentPlayingTrack = ({
 
       // console.log({ new: session.sessionMusics[0].music?.name });
 
-      io.emit(SESSION_CHANGED, session.id);
+      emitSessionChangeToAll();
       socket
         .to(String(session.id))
         .emit(MUSIC_CHANGED, String(currentSessionMusic.music?.uri));
@@ -132,7 +139,7 @@ export const registerUserEvents = async (io: Server, socket: Socket) => {
   };
 
   const watchUserListener = async (data: WatchUserListenerPayload) => {
-    await setNewPlayTrack(data.music_uri, data.spotify_token);
+    setNewPlayTrack(data.music_uri, data.spotify_token);
 
     socket.join(String(data.session_id));
   };
