@@ -8,19 +8,28 @@ export interface IUser extends User {
 
 export interface WatchUserSessionPayload {
   user_id: number;
-  spotify_token: string;
 }
 
 export interface WatchCurrentPlayingTrackPayload {
   socket: Socket;
   io: Server;
   session: SessionResponse;
-  spotify_token: string;
 }
 
 export interface WatchUserListenerPayload {
   user_id: number;
   session_id: number;
-  spotify_token: string;
+  progress_ms: number;
   music_uri: string;
+}
+
+export interface SetNewPlayTrackPayload {
+  music_uri: string;
+  progress_ms: number;
+}
+
+export interface SetSpotifyTokens {
+  user_id: number;
+  access_token: string;
+  refresh_token: string;
 }
