@@ -21,16 +21,13 @@ const SESSION_FINISHED = 'session_finished';
 const USER_LISTENER = 'user_listener';
 
 const GET_CURRENTLY_PLAYING_TRACK = '/me/player/currently-playing';
-const SET_NEW_PLAY_TRACK = '/me/player/currently-playing';
+const SET_NEW_PLAY_TRACK = '/me/player/play';
 
-const setInterceptors = async (
-  spotify_access_token: string,
-  user_id: number,
-) => {
+const setInterceptors = (spotify_access_token: string, user_id: number) => {
   const authRepository = new AuthenticationRepository(prismaClient);
 
   spotifyApi.interceptors.request.use((config) => {
-    config.headers!.Authorization = `Bearer test`;
+    config.headers!.Authorization = `Bearer ${spotify_access_token}`;
 
     return config;
   });
@@ -41,8 +38,7 @@ const setInterceptors = async (
       const originalRequest = error.config;
 
       if (error.response.status === 401 && !originalRequest._retry) {
-        await authRepository.refreshSpotifyToken(user_id);
-        const spotify_access_token = await authRepository.getSpotifyAcessToken(
+        const spotify_access_token = await authRepository.refreshSpotifyToken(
           user_id,
         );
 
@@ -163,7 +159,7 @@ const watchCurrentPlayingTrack = ({
   }, 1000);
 };
 
-const setNewPlayTrack = async ({
+const setNewPlayTrack = ({
   music_uri,
   progress_ms,
 }: SetNewPlayTrackPayload) => {
