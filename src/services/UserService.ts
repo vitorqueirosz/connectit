@@ -16,4 +16,12 @@ export class UserService implements IUserService {
 
     return user;
   }
+
+  async findUserById(id: number) {
+    const user = await this.prisma.user.findFirst({
+      where: { id },
+    });
+
+    return user;
+  }
 }

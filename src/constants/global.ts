@@ -8,4 +8,6 @@ export const DEFAULT_USER_OBJECT = {
   telephone: true,
   updated_at: true,
   password: false,
+  access_spotify_token: true,
+  refresh_spotify_token: true,
 };
