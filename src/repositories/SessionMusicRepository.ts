@@ -5,7 +5,7 @@ import {
   PrismaClient,
   SessionMusic,
 } from '@prisma/client';
-import { ISessionMusic } from 'interfaces/Session';
+import { ISessionMusic, UpdateProgressPayload } from 'interfaces/Session';
 
 interface ISessionMusicRepository {
   create: (session: ISessionMusic) => Promise<SessionMusic>;
@@ -34,6 +34,7 @@ export class SessionMusicRepository implements ISessionMusicRepository {
       albumType,
       duration,
       session_id,
+      progressMs,
     } = sessionMusic;
 
     const [music, album, artist] = await Promise.all([
@@ -91,6 +92,7 @@ export class SessionMusicRepository implements ISessionMusicRepository {
       data: {
         session_id,
         music_id: musicData.id,
+        progress_ms: progressMs,
       },
       include: {
         music: {
@@ -103,5 +105,16 @@ export class SessionMusicRepository implements ISessionMusicRepository {
     });
 
     return createdSessionMusic;
+  }
+
+  updateProgress({ session_music_id, progress_ms }: UpdateProgressPayload) {
+    return this.prisma.sessionMusic.update({
+      where: {
+        id: session_music_id,
+      },
+      data: {
+        progress_ms,
+      },
+    });
   }
 }
