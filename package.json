@@ -44,7 +44,6 @@
     "express": "^4.17.2",
     "jsonwebtoken": "^8.5.1",
     "qs": "^6.10.3",
-    "request": "^2.88.2",
     "socket.io": "^4.4.1"
   }
 }
