@@ -12,8 +12,13 @@ export interface ISession {
   albumName: string;
   albumType: string;
   duration: number;
+  progressMs: number;
 }
 
+export interface UpdateProgressPayload {
+  progress_ms: number;
+  session_music_id: number;
+}
 export interface ISessionMusic extends ISession {
   session_id: number;
 }
