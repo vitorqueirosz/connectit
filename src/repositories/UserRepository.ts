@@ -5,15 +5,12 @@ import { UserService, AuthenticationService } from 'services';
 
 interface IUserRepository {
   create: (user: IUser) => Promise<IUser>;
-  update?: (userId: string) => Promise<IUser>;
 }
 
 export class UserRepository implements IUserRepository {
   constructor(private prisma: PrismaClient) {
     this.prisma = prisma;
   }
-
-  // async update(userId: string) {}
 
   async create(user: IUser) {
     const userService = new UserService(this.prisma);

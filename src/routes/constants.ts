@@ -2,6 +2,7 @@ const USER = {
   ROOT: '/',
   BASE: '/users',
   LOGIN: '/login',
+  SPOTIFY_AUTH: '/spotify/:id',
 };
 
 const SESSION = {
