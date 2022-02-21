@@ -82,3 +82,14 @@ export interface TrackPayload {
   actions: Actions;
   is_playing: boolean;
 }
+
+export interface SpotifyTokenPayload {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  scope: string;
+}
+
+export interface SpotifyAccessTokenPayload extends SpotifyTokenPayload {
+  refresh_token: string;
+}
