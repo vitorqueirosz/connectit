@@ -11,7 +11,6 @@ import {
 import { AuthenticationRepository } from 'repositories/AuthenticationRepository';
 import { SessionMusicRepository } from 'repositories/SessionMusicRepository';
 import { SessionRepository } from 'repositories/SessionRepository';
-import { UserRepository } from 'repositories/UserRepository';
 import { spotifyApi, prismaClient } from 'services';
 import { Server, Socket } from 'socket.io';
 import { setTimeOut } from 'utils/asyncTimeOut';
@@ -28,7 +27,6 @@ const setInterceptors = async (
   spotify_access_token: string,
   user_id: number,
 ) => {
-  const userRepository = new UserRepository(prismaClient);
   const authRepository = new AuthenticationRepository(prismaClient);
 
   spotifyApi.interceptors.request.use((config) => {
@@ -44,7 +42,7 @@ const setInterceptors = async (
 
       if (error.response.status === 401 && !originalRequest._retry) {
         await authRepository.refreshSpotifyToken(user_id);
-        const spotify_access_token = await userRepository.getSpotifyAcessToken(
+        const spotify_access_token = await authRepository.getSpotifyAcessToken(
           user_id,
         );
 
@@ -174,10 +172,10 @@ const setNewPlayTrack = async ({
 };
 
 export const registerUserEvents = async (io: Server, socket: Socket) => {
-  const userRepository = new UserRepository(prismaClient);
+  const authRepository = new AuthenticationRepository(prismaClient);
 
   const watchUserSession = async (data: WatchUserSessionPayload) => {
-    const spotify_token = await userRepository.getSpotifyAcessToken(
+    const spotify_token = await authRepository.getSpotifyAcessToken(
       data.user_id,
     );
 
@@ -206,7 +204,7 @@ export const registerUserEvents = async (io: Server, socket: Socket) => {
   };
 
   const watchUserListener = async (data: WatchUserListenerPayload) => {
-    const spotify_token = await userRepository.getSpotifyAcessToken(
+    const spotify_token = await authRepository.getSpotifyAcessToken(
       data.user_id,
     );
 

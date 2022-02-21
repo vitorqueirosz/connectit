@@ -1,5 +1,5 @@
 import axios from 'axios';
 
-export const api = axios.create({
+export const spotifyApi = axios.create({
   baseURL: 'https://api.spotify.com/v1',
 });
