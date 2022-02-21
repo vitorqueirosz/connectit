@@ -19,6 +19,8 @@ model User {
   avatar String?
   city String
   telephone String
+  access_spotify_token String?
+  refresh_spotify_token String?
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
   sessions Session[]
@@ -75,6 +77,7 @@ model SessionMusic {
   session_id Int?
   music Music? @relation(fields: [music_id], references: [id])
   music_id String?
+  progress_ms Int
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
 }
