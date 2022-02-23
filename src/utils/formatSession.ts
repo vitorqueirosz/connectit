@@ -58,6 +58,7 @@ export interface FormatedSessionListener {
 const sessionMusicDefaultObject = (sessionMusic: SessionMusicPayload) => ({
   id: sessionMusic.id,
   session_id: sessionMusic.session_id,
+  progress_ms: sessionMusic.progress_ms,
   created_at: sessionMusic.created_at,
   music: {
     id: sessionMusic.music?.id,
