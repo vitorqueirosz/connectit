@@ -13,6 +13,7 @@ import {
   formatSessions,
 } from 'utils/formatSession';
 import { SessionMusicRepository } from './SessionMusicRepository';
+import { UserRepository } from './UserRepository';
 
 export interface SessionMusicPayload extends SessionMusic {
   music: MusicResponse | null;
@@ -34,7 +35,10 @@ interface ISessionRepository {
   create: (sessionPayload: SessionPayload) => Promise<Session>;
   getUserActiveSession: (userId: number) => Promise<FormatedSession | null>;
   getAllActiveSessions: () => Promise<(FormatedSession | null)[]>;
-  inativeUserSession: (session_id: number) => Promise<Session>;
+  inativeUserSession: (session_id: number) => Promise<{
+    user: User | null;
+    sessionListeners: SessionListener[];
+  }>;
 }
 
 export class SessionRepository implements ISessionRepository {
@@ -50,6 +54,7 @@ export class SessionRepository implements ISessionRepository {
     if (hasSessionActive) throw new Error(`User already has a active session`);
 
     const sessionMusicRepository = new SessionMusicRepository(this.prisma);
+    const userRepository = new UserRepository(this.prisma);
 
     const createdSession = await this.prisma.session.create({
       data: {
@@ -83,6 +88,8 @@ export class SessionRepository implements ISessionRepository {
         },
       },
     });
+
+    await userRepository.setUserStatus(user_id, 'owner');
 
     const sessionMusic = await sessionMusicRepository.create({
       ...session,
@@ -219,7 +226,20 @@ export class SessionRepository implements ISessionRepository {
       data: {
         active: false,
       },
+      select: {
+        user: true,
+        sessionListeners: true,
+      },
     });
+
+    const userRepository = new UserRepository(this.prisma);
+
+    await Promise.all([
+      userRepository.setUserStatus(activeSession.user!.id, null),
+      ...activeSession.sessionListeners.map((listener) => {
+        return userRepository.setUserStatus(Number(listener.user_id), null);
+      }),
+    ]);
 
     return activeSession;
   }
