@@ -1,12 +1,12 @@
 import { PrismaClient, SessionListener, User } from '@prisma/client';
 import { DEFAULT_USER_OBJECT } from 'constants/global';
-import { prismaClient } from 'services/prisma';
 import {
   FormatedSessionListener,
   formatSessionListener,
   formatSessionListeners,
 } from 'utils/formatSession';
 import { SessionRepository, SessionResponse } from './SessionRepository';
+import { UserRepository } from './UserRepository';
 
 export interface SessionListenerResponse extends SessionListener {
   session: Omit<SessionResponse, 'sessionListeners'> | null;
@@ -86,8 +86,8 @@ export class SessionListenerRepository implements ISessionListenerRepository {
     });
 
     if (userHasActiveSession) {
-      const sessionRepository = new SessionRepository(prismaClient);
-      sessionRepository.inativeUserSession(userHasActiveSession.id);
+      const sessionRepository = new SessionRepository(this.prisma);
+      await sessionRepository.inativeUserSession(userHasActiveSession.id);
     }
 
     const sessionListenerExists =
@@ -98,12 +98,16 @@ export class SessionListenerRepository implements ISessionListenerRepository {
 
     if (sessionListenerExists) throw new Error(`User already on this section`);
 
+    const userRepository = new UserRepository(this.prisma);
+
     const createdSessionListener = await this.prisma.sessionListener.create({
       data: {
         user_id,
         session_id,
       },
     });
+
+    await userRepository.setUserStatus(user_id, 'listener');
 
     return createdSessionListener;
   }
