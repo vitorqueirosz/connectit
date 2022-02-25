@@ -1,5 +1,6 @@
 const USER = {
   ROOT: '/',
+  ME: '/me',
   BASE: '/users',
   LOGIN: '/login',
   SPOTIFY_AUTH: '/spotify/:id',

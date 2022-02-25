@@ -14,6 +14,16 @@ class UserController {
 
     return response.status(201).json({ user });
   }
+
+  async get(request: Request, response: Response) {
+    const user_id = request.user.id;
+
+    const userRepository = new UserRepository(prismaClient);
+
+    const user = await userRepository.get(user_id);
+
+    return response.status(201).json({ user });
+  }
 }
 
 export default new UserController();
