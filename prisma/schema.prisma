@@ -21,10 +21,16 @@ model User {
   telephone String
   access_spotify_token String?
   refresh_spotify_token String?
+  current_status STATUS?
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
   sessions Session[]
   sessionListeners SessionListener[]
+}
+
+enum STATUS {
+  listener @map("listener")
+  owner @map("owner")
 }
 
 model Album {
