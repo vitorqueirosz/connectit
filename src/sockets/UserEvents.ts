@@ -89,6 +89,10 @@ const watchCurrentPlayingTrack = ({
   const sessionMusicRepository = new SessionMusicRepository(prismaClient);
   const sessionRepository = new SessionRepository(prismaClient);
 
+  const emitSessionChangeToAll = () => io.emit(SESSION_CHANGED, session.id);
+
+  emitSessionChangeToAll();
+
   const updateSessionMusicProgress = (
     session_music_id: number,
     progress_ms: number,
@@ -98,8 +102,6 @@ const watchCurrentPlayingTrack = ({
       progress_ms,
     });
   };
-
-  const emitSessionChangeToAll = () => io.emit(SESSION_CHANGED, session.id);
 
   let keepRunning = true;
   let progress_ms = 0;
@@ -117,13 +119,12 @@ const watchCurrentPlayingTrack = ({
 
     if (!hasMusicChanged) progress_ms = currentTrack.progress_ms;
 
+    await updateSessionMusicProgress(currentSessionMusic.id, progress_ms);
+
     // console.log({ old: session.sessionMusics[0].music?.name });
 
     if (!isMusicStillPlaying) {
-      await Promise.all([
-        sessionRepository.inativeUserSession(session.id),
-        updateSessionMusicProgress(currentSessionMusic.id, progress_ms),
-      ]);
+      await sessionRepository.inativeUserSession(session.id);
 
       emitSessionChangeToAll();
       socket.to(String(session.id)).emit(SESSION_FINISHED, 'stop');
