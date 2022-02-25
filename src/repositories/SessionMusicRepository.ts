@@ -117,4 +117,19 @@ export class SessionMusicRepository implements ISessionMusicRepository {
       },
     });
   }
+
+  async getAllSessionMusicsProgress() {
+    const sessions = await this.prisma.sessionMusic.findMany({
+      where: {
+        session: {
+          active: true,
+        },
+      },
+      select: {
+        progress_ms: true,
+      },
+    });
+
+    return sessions;
+  }
 }
