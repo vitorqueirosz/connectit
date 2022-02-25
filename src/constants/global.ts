@@ -10,4 +10,5 @@ export const DEFAULT_USER_OBJECT = {
   password: false,
   access_spotify_token: true,
   refresh_spotify_token: true,
+  current_status: true,
 };
