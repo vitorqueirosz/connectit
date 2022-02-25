@@ -42,4 +42,27 @@ export class UserRepository implements IUserRepository {
 
     return createdUser;
   }
+
+  async get(user_id: number) {
+    const userService = new UserService(this.prisma);
+
+    const userExists = await userService.findUserById(user_id);
+
+    if (!userExists) throw new Error(`User not found`);
+
+    return userExists;
+  }
+
+  async setUserStatus(user_id: number, status: 'listener' | 'owner' | null) {
+    const userService = new UserService(this.prisma);
+
+    const userExists = await userService.findUserById(user_id);
+
+    if (!userExists) throw new Error(`User not found`);
+
+    await this.prisma.user.update({
+      where: { id: user_id },
+      data: { current_status: status },
+    });
+  }
 }
